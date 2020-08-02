@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 import argparse
 import time
@@ -358,7 +359,11 @@ elif '/Attraction_Review' in url:
     print("Attractions not yet supported")
 elif '/VacationRentalReview-' in url:
     print("Vacation rentals not yet supported")
-s
+
+# Create tmp directory, if it doesn't exist
+if not os.path.exists('tmp'):
+    os.makedirs('tmp')
+
 # Writes data output to JSON file, named using a UUID
 with open('./tmp/' + str(uuid.uuid1()) + '.json', 'w') as outfile:
     json.dump(data, outfile, indent=4)
