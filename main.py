@@ -13,21 +13,24 @@ from selenium.webdriver.chrome.options import Options
 from tqdm import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
 
-
-options = Options()
-options.headless = True
-options.add_argument("--window-size=1920,1200")
-options.add_argument("--remote-debugging-port=9222")
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-
 # Instantiate the parser
 parser = argparse.ArgumentParser()
 # Required URL positional argument
 parser.add_argument('url', type=str,
                     help='The URL of the TripAdvisor page')
+parser.add_argument('--proxy', type=str, help='Optional, use HTTP Proxy')
+
 # Parse arguments
 args = parser.parse_args()
+
+# Set Chrome options
+options = Options()
+options.headless = True
+options.add_argument("--window-size=1920,1200")
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+if args.proxy:
+    options.add_argument('--proxy-server=%s' % args.proxy)
 
 # Downloads latest ChromeDriver and sets it as the driver for Selenium
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
@@ -42,15 +45,16 @@ def check_exists_by_xpath(xpath):
     return True
 
 
+# Set's url from arguments
 url = args.url
 # Creates JSON list for use later
 data = {}
+
 
 # Function to scrape hotel listing
 def scrape_hotel_listing(page_url):
     # Get's page set in page_url and opens it in Chrome
     driver.get(page_url)
-
     data['listing'] = []
     data['reviews'] = []
 
@@ -62,13 +66,15 @@ def scrape_hotel_listing(page_url):
                                    driver.find_element_by_xpath("//span[@class='_33O9dg0j']").text.replace(',', ''))[0]
 
     # Find the average review score
-    average_review = re.findall("\d+", driver.find_element_by_xpath("//span[@class='_3cjYfwwQ']").text.replace('.', ''))[
-        0]
+    average_review = \
+        re.findall("\d+", driver.find_element_by_xpath("//span[@class='_3cjYfwwQ']").text.replace('.', ''))[
+            0]
 
     # Checks address is provided on listing
     if check_exists_by_xpath("//div[@class='_1sPw_t0w _3sCS_WGO']//span[@class='_3ErVArsu jke2_wbp']"):
         # Set's address as address on listing
-        address = driver.find_element_by_xpath("//div[@class='_1sPw_t0w _3sCS_WGO']//span[@class='_3ErVArsu jke2_wbp']").text
+        address = driver.find_element_by_xpath(
+            "//div[@class='_1sPw_t0w _3sCS_WGO']//span[@class='_3ErVArsu jke2_wbp']").text
     else:
         # Set's address as None
         address = None
@@ -82,7 +88,9 @@ def scrape_hotel_listing(page_url):
     # Checks website url provide on listing
     if check_exists_by_xpath("//span[contains(text(),'Visit hotel website')]"):
         # Set's website as website on listing
-        redirect_url = driver.find_element_by_xpath("//div[@class='_1sPw_t0w _3sCS_WGO']//a[@class='_2wKz--mA _2U17tZ2G _1YIGmrPj _2-kzHHGX']").get_attribute("href")
+        redirect_url = driver.find_element_by_xpath(
+            "//div[@class='_1sPw_t0w _3sCS_WGO']//a[@class='_2wKz--mA _2U17tZ2G _1YIGmrPj _2-kzHHGX']").get_attribute(
+            "href")
         website = requests.get(redirect_url).url
     else:
         # Set's website as None
@@ -127,7 +135,8 @@ def scrape_hotel_listing(page_url):
                 userid = None
 
             # Scrapes review date element
-            review_date_element = driver.find_element_by_xpath('//div[@data-reviewid="' + x + '"]/..//div[@class="_2fxQ4TOx"]')
+            review_date_element = driver.find_element_by_xpath(
+                '//div[@data-reviewid="' + x + '"]/..//div[@class="_2fxQ4TOx"]')
             # Extract's review date from title attribute
             review_date_cleansed = review_date_element.text.rsplit('review ')[1]
             review_date = dateparser.parse(review_date_cleansed).strftime('%B %Y')
@@ -145,7 +154,8 @@ def scrape_hotel_listing(page_url):
                 date_of_visit = None
 
             # Scrapes title of review
-            review_title_element = driver.find_element_by_xpath('//div[@data-reviewid="' + x + '"]//a[@class="ocfR3SKN"]')
+            review_title_element = driver.find_element_by_xpath(
+                '//div[@data-reviewid="' + x + '"]//a[@class="ocfR3SKN"]')
             # Extract title of review
             review_title = review_title_element.text
 
@@ -153,7 +163,8 @@ def scrape_hotel_listing(page_url):
             if check_exists_by_xpath('//div[@data-reviewid="' + x + '"]//div[@class="XUVJZtom"]'):
                 time.sleep(1)
                 # Review is expanded
-                if driver.find_element_by_xpath('//div[@data-reviewid="' + x + '"]//div[@class="XUVJZtom"]').text == "Read more":
+                if driver.find_element_by_xpath(
+                        '//div[@data-reviewid="' + x + '"]//div[@class="XUVJZtom"]').text == "Read more":
                     driver.find_element_by_xpath('//div[@data-reviewid="' + x + '"]//div[@class="XUVJZtom"]').click()
                 # Provide time for review to expand
                 time.sleep(1)
@@ -189,6 +200,7 @@ def scrape_hotel_listing(page_url):
             # Allow page to load
             time.sleep(1)
     return data
+
 
 # Function to scrape restaurant listing
 def scrape_restaurant_listing(page_url):
@@ -336,6 +348,7 @@ def scrape_restaurant_listing(page_url):
             time.sleep(1)
     return data
 
+
 # Executes function according to the listing type
 if '/Restaurant_' in url:
     scrape_restaurant_listing(url)
@@ -345,7 +358,7 @@ elif '/Attraction_Review' in url:
     print("Attractions not yet supported")
 elif '/VacationRentalReview-' in url:
     print("Vacation rentals not yet supported")
-
+s
 # Writes data output to JSON file, named using a UUID
 with open('./tmp/' + str(uuid.uuid1()) + '.json', 'w') as outfile:
     json.dump(data, outfile, indent=4)
