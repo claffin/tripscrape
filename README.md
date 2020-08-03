@@ -14,7 +14,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 Python 3.8 or Docker required. 
 
-### Get started (using virtualenv)
+## Get started (using virtualenv)
 
 A step by step series of examples that tell you how to get a development env running.
 
@@ -40,7 +40,7 @@ python main.py $url
 e.g. python main.py https://www.tripadvisor.co.uk/Hotel_Review-g186338-d187686-Reviews-The_Savoy-London_England.html
 ```
 
-### Get Started (Docker)
+## Get Started (Docker)
 
 Pull the Docker image.
 ```
@@ -50,12 +50,12 @@ Run the Docker image.
 ```
 docker run laffin/tripscrape $url 
 ```
-#### Example
+### Example
 ```
 docker run laffin/tripscrape https://www.tripadvisor.co.uk/Hotel_Review-g186338-d187686-Reviews-The_Savoy-London_England.html
 ```
 
-### Options
+## Options
 
 Two options:
 url = The URL you would like to scrape.
@@ -64,7 +64,7 @@ url = The URL you would like to scrape.
 tripscrape $url --proxy $proxy
 ```
 
-### Output
+## Output
 The output is stored in 'tmp' in the same folder the app runs in. 
 
 ### Example Output
