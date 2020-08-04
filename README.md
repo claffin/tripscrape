@@ -58,7 +58,10 @@ docker run laffin/tripscrape https://www.tripadvisor.co.uk/Hotel_Review-g186338-
 ## Options
 
 Two options:
+
 url = The URL you would like to scrape.
+
+proxy = provide a proxy to use.
 
 ```
 tripscrape $url --proxy $proxy
