@@ -1,10 +1,10 @@
 # tripscrape
 
-Scrapes Tripadvisor reviews and outputs the high level info about the place (e.g. name, number of reviews, average rating, address, telephone, website). 
+Scrapes Tripadvisor and Yelp reviews and outputs the high level info about the place (e.g. name, number of reviews, average rating, address, telephone, website). 
 
 Individual reviews are also outputted with user id, review date, date of visit, review body, review rating. See example output below.
 
-Only supports Hotels and Restaurants currently. Attractions and Vacation Rentals are on the roadmap (see issues).
+Only supports Yelp reviews and TripAdvisor Hotels and Restaurants currently.
 
 ## Getting Started
 
