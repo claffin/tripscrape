@@ -15,6 +15,8 @@ from tqdm import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Instantiate the parser
+from yelp import scrape_yelp_reviews
+
 parser = argparse.ArgumentParser()
 # Required URL positional argument
 parser.add_argument('url', type=str,
@@ -24,17 +26,20 @@ parser.add_argument('--proxy', type=str, help='Optional, use HTTP Proxy')
 # Parse arguments
 args = parser.parse_args()
 
-# Set Chrome options
-options = Options()
-options.headless = True
-options.add_argument("--window-size=1920,1200")
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-if args.proxy:
-    options.add_argument('--proxy-server=%s' % args.proxy)
 
-# Downloads latest ChromeDriver and sets it as the driver for Selenium
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+def chrome_setup():
+    # Set Chrome options
+    options = Options()
+    options.headless = True
+    options.add_argument("--window-size=1920,1200")
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    if args.proxy:
+        options.add_argument('--proxy-server=%s' % args.proxy)
+
+    # Downloads latest ChromeDriver and sets it as the driver for Selenium
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    return driver
 
 
 # Function to checks xpath exists
@@ -55,6 +60,7 @@ data = {}
 # Function to scrape hotel listing
 def scrape_hotel_listing(page_url):
     # Get's page set in page_url and opens it in Chrome
+    driver = chrome_setup()
     driver.get(page_url)
     data['listing'] = []
     data['reviews'] = []
@@ -111,7 +117,7 @@ def scrape_hotel_listing(page_url):
     total_pages = driver.find_element_by_xpath("//a[6]")
     # Extract's total page numbers from element
 
-    total_pages_numbers = int(total_pages.text) - 1163
+    total_pages_numbers = int(total_pages.text)
 
     # Loop by number of total pages
     for z in tqdm(range(total_pages_numbers)):
@@ -200,12 +206,14 @@ def scrape_hotel_listing(page_url):
             total_pages_numbers = total_pages_numbers - 1
             # Allow page to load
             time.sleep(1)
+    driver.quit()
     return data
 
 
 # Function to scrape restaurant listing
 def scrape_restaurant_listing(page_url):
     # Get's page set in page_url and opens it in Chrome
+    driver = chrome_setup()
     driver.get(page_url)
 
     data['listing'] = []
@@ -347,6 +355,7 @@ def scrape_restaurant_listing(page_url):
             total_pages_numbers = total_pages_numbers - 1
             # Allow page to load
             time.sleep(1)
+    driver.quit()
     return data
 
 
@@ -359,6 +368,8 @@ elif '/Attraction_Review' in url:
     print("Attractions not yet supported")
 elif '/VacationRentalReview-' in url:
     print("Vacation rentals not yet supported")
+elif '/biz' in url:
+    data = scrape_yelp_reviews(url)
 
 # Create tmp directory, if it doesn't exist
 if not os.path.exists('tmp'):
@@ -367,6 +378,3 @@ if not os.path.exists('tmp'):
 # Writes data output to JSON file, named using a UUID
 with open('./tmp/' + str(uuid.uuid1()) + '.json', 'w') as outfile:
     json.dump(data, outfile, indent=4)
-
-# Closes the browser and session
-driver.quit()
