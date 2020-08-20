@@ -10,6 +10,7 @@ from tqdm import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Instantiate the parser
+from google import scrape_google_reviews
 from tripadvisor import scrape_restaurant_listing, scrape_hotel_listing
 from yelp import scrape_yelp_reviews
 
@@ -53,6 +54,9 @@ elif '/VacationRentalReview-' in url:
     print("Vacation rentals not yet supported")
 elif '/biz' in url:
     data = scrape_yelp_reviews(url)
+elif '/search?' in url:
+    driver = chrome_setup()
+    data = scrape_google_reviews(url, driver)
 
 # Create tmp directory, if it doesn't exist
 if not os.path.exists('tmp'):
