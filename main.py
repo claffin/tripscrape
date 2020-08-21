@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Instantiate the parser
 from google import scrape_google_reviews
+from opentable import scrape_opentable_reviews
 from tripadvisor import scrape_restaurant_listing, scrape_hotel_listing
 from yelp import scrape_yelp_reviews
 
@@ -45,6 +46,9 @@ url = args.url
 if '/Restaurant_' in url:
     driver = chrome_setup()
     data = scrape_restaurant_listing(url, driver)
+elif 'opentable' in url:
+    driver = chrome_setup()
+    data = scrape_opentable_reviews(url, driver)
 elif '/Hotel_' in url:
     driver = chrome_setup()
     data = scrape_hotel_listing(url, driver)
